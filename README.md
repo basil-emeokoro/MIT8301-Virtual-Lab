@@ -53,4 +53,12 @@ Headline results and the selected model are generated from actual execution in `
 
 This small historical educational dataset cannot justify autonomous lending decisions. Sex and age may create fairness concerns; predictions require human review, explanations, appeal mechanisms, privacy protection, drift monitoring, and periodic bias audits.
 
+## Key Engineering Lessons
+
+1. **Authenticate outcomes before modelling.** Supervised learning requires genuine labels; the missing target was restored only after 100% row-level predictor reconciliation and checksum-backed provenance validation.
+2. **Treat preprocessing as fitted model behaviour.** Imputation, encoding, scaling, and outlier clipping belong inside training-fitted pipelines so test information cannot leak into the model.
+3. **Use limited data efficiently.** A stratified 80/20 split with Stratified 5-Fold Cross-Validation preserved the 70%/30% class balance while retaining more observations for learning and robust tuning.
+4. **Balance performance with governance.** Logistic Regression was preferred when close to the leading SVM because transparent coefficients improve auditability, explanation, and operational review in lending.
+5. **Make evidence reproducible.** Assertions, tests, provenance reports, generated figures, documented environments, and Git history turn an analysis into an inspectable engineering artifact.
+
 Repository: https://github.com/basil-emeokoro/MIT8301-Virtual-Lab

@@ -98,6 +98,44 @@ Sex is sensitive and age can create protected-class concerns. Historical labels 
 
 The dataset is small, historical, geographically specific, and omits important affordability and contemporary lending variables. Labels have no event-time detail; calibration and temporal stability are not established. The simplified nine-feature representation loses information from the original 20-feature UCI data. Reported test estimates have sampling uncertainty.
 
+## Lessons Learned and Engineering Reflection
+
+### Principal engineering challenge
+
+The most consequential challenge was not model selection but the absence of a target variable in the supplied German Credit CSV. Supervised classification requires authentic observed outcomes: without a good/bad credit label, there is no valid response variable from which a classifier can learn or against which it can be evaluated. Creating synthetic labels, inferring them from predictor thresholds, clustering applicants and treating the clusters as outcomes, or deriving labels from the same features used for prediction would have introduced circular reasoning and invalidated the experiment. The appropriate engineering decision was therefore to pause supervised modelling until label provenance could be established. Preserving dataset integrity was more important than forcing a pipeline to produce metrics.
+
+### Engineering solution and provenance control
+
+The resolution began with an investigation of the supplied file's schema and the provenance of the simplified German Credit representation. An authentic target-inclusive edition with the same nine predictors was identified. The reconciliation process removed export-only identifiers, standardised column names, and normalised only harmless representation differences such as surrounding whitespace and demonstrably equivalent category case. It then compared every predictor, row by row and feature by feature, before accepting any label.
+
+The verification produced a 100% match for every predictor and zero mismatched cells across 1,000 observations. SHA-256 checksums were recorded for both raw inputs, duplicate diagnostics and class counts were produced, and the procedure was documented in a machine-readable and human-readable validation report. Only after these checks passed was the authentic target appended and mapped to `credit_risk`, with 1 representing bad/risky credit and 0 representing good credit. This retained the original alignment between each applicant and the corresponding outcome.
+
+This experience illustrates why data provenance is an operational requirement rather than an administrative detail. In a real machine-learning system, an apparently small join, row-order change, or unverified label source can silently corrupt the relationship between features and outcomes while leaving the code executable. Checksums, explicit reconciliation rules, fail-fast assertions, and durable validation reports make those risks observable and auditable.
+
+### Machine-learning lessons
+
+**Data quality.** Model quality depends first on the validity, alignment, and meaning of the data. A sophisticated estimator cannot compensate for an unauthenticated target or an incorrect feature-outcome join. The project also reinforced that reproducible preprocessing is more valuable than pursuing a marginal improvement in headline accuracy: the same inputs should pass through the same documented, testable transformations whenever the analysis is repeated.
+
+**Preventing leakage.** Leakage was prevented by separating training and test data before any learned transformation entered the model workflow. Missing-value imputation, one-hot encoding, robust scaling, and IQR clipping were placed inside Pipeline and ColumnTransformer objects, causing each operation to learn its parameters from the relevant training fold only. The independent test set remained untouched until final evaluation. This matters because leakage can make a weak model appear deceptively successful by allowing information about held-out observations to influence preprocessing, tuning, or selection.
+
+**Stratification.** The original target distribution contains 70% good credit and 30% bad credit. Stratified sampling preserved this balance exactly in the 800-row training set and 200-row test set. The resulting 560/240 and 140/60 class counts reduced the risk that an accidental shift in class proportions would distort comparison or make risky-class recall less reliable.
+
+**Cross-validation.** Stratified 5-Fold Cross-Validation was selected instead of reserving a separate validation dataset. With only 1,000 observations, rotating validation folds make better use of the 800 training cases, provide more stable hyperparameter evidence than one small holdout, and preserve class proportions in every fold. GridSearchCV evaluated configurations only within those training folds and then refitted the selected configuration on the complete training set, supporting a stronger estimate of generalisation before the single test evaluation.
+
+**Interpretability.** The tuned SVM achieved the highest test ROC-AUC, but tuned Logistic Regression was selected under the predeclared rule because its ROC-AUC was within 0.03 of the leader and its coefficients provide clearer decision logic. In credit-risk settings, engineering quality includes the ability to explain influential factors, reproduce a decision path, and support review by governance teams, auditors, and regulators. Predictive performance remains important, but a small gain from a less transparent model may not outweigh the operational value of understandable and contestable outputs.
+
+### Responsible machine-learning reflection
+
+Responsible credit-risk modelling requires controls tied to the actual decision context. Sex and age can expose applicants to disparate outcomes, and apparently neutral variables may act as proxies for protected characteristics. Transparency therefore includes documenting the target, transformations, evaluation population, decision threshold, subgroup diagnostics, and known limitations. Explainability must be usable by reviewers and affected applicants rather than treated as a decorative chart. Reproducible code, versioned data checks, tests, model documentation, approval controls, drift monitoring, and appeal procedures form part of governance. Most importantly, a prediction should support - not replace - professional judgement in a high-impact lending decision; adverse outcomes require human oversight and a meaningful route for review.
+
+### Professional reflection
+
+I found that this assignment strengthened my understanding of machine learning as an end-to-end engineering discipline rather than an isolated model-fitting exercise. Restoring the verified target required data engineering and provenance reasoning; the leakage-safe pipeline required careful separation of fitting and transformation; the scratch implementation connected mathematical concepts to tested software; and the tuning and evaluation stages required disciplined validation rather than selective reporting. Packaging the workflow with tests, reproducibility files, generated evidence, documentation, and Git history also demonstrated how software-engineering practices make analytical work easier to inspect, repeat, and maintain. The responsible-AI analysis further clarified that technical validity and accountable use must be designed together in credit-risk applications.
+
+### Portfolio value
+
+As a portfolio project, the completed repository demonstrates practical competence in data reconciliation and preprocessing, supervised classification, first-principles model implementation, hyperparameter optimisation, leakage-safe evaluation, explainable modelling, automated testing, reproducible research, report generation, and Git-based project management. The value lies in the traceable workflow from raw data to verified evidence, not in a single metric.
+
 ## Conclusion
 
 The workflow restored authentic labels without fabrication, prevented leakage, implemented Logistic Regression from first principles, tuned the required algorithm families, evaluated all requested metrics, and produced transparent interpretation. The result is suitable for assessment and portfolio demonstration, not production lending.
