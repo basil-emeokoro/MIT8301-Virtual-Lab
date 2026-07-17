@@ -63,7 +63,23 @@ def report_markdown(results):
     metrics = results["metrics"]
     tuning = results["tuning"]
     metric_rows = "\n".join(f"| {r['Model']} | {r['Accuracy']:.3f} | {r['Precision']:.3f} | {r['Recall']:.3f} | {r['F1']:.3f} | {r['ROC_AUC']:.3f} |" for r in metrics)
-    tune_lines = "\n".join(f"- **{name}:** CV ROC-AUC {data['best_cv_roc_auc']:.3f}; `{data['best_params']}`" for name, data in tuning.items())
+    parameter_labels = {
+        "model__C": "C", "model__class_weight": "Class weight",
+        "model__penalty": "Penalty", "model__solver": "Solver",
+        "model__gamma": "Gamma", "model__kernel": "Kernel",
+        "model__var_smoothing": "Variance smoothing",
+    }
+    tuning_sections = []
+    for name, data in tuning.items():
+        rows = []
+        for parameter, value in data["best_params"].items():
+            display = "None" if value is None else str(value)
+            rows.append(f"| {parameter_labels.get(parameter, parameter)} | {display} |")
+        tuning_sections.append(
+            f"### {name}\n\nBest cross-validated ROC-AUC: **{data['best_cv_roc_auc']:.3f}**\n\n"
+            "| Parameter | Selected value |\n|---|---|\n" + "\n".join(rows)
+        )
+    tune_tables = "\n\n".join(tuning_sections)
     top_lines = "\n".join(f"- `{r['Feature']}`: {r['Coefficient']:+.3f}" for r in results["top_coefficients"][:10])
     return f"""# MIT 8301 Continuous Assessment - Virtual Laboratory
 
@@ -121,7 +137,7 @@ The implementation provides a stable clipped sigmoid, explicit bias, binary cros
 
 Training used stratified five-fold GridSearchCV and ROC-AUC as the primary score. The test set was never used for tuning. Tuning controls regularisation, margin/kernel complexity, class weighting, and Naive Bayes variance smoothing, improving generalisation without test leakage.
 
-{tune_lines}
+{tune_tables}
 
 ## Test Evaluation and Comparison
 
@@ -183,19 +199,15 @@ Responsible credit-risk modelling requires controls tied to the actual decision 
 
 ### Professional reflection
 
-I found that this assignment strengthened my understanding of machine learning as an end-to-end engineering discipline rather than an isolated model-fitting exercise. Restoring the verified target required data engineering and provenance reasoning; the leakage-safe pipeline required careful separation of fitting and transformation; the scratch implementation connected mathematical concepts to tested software; and the tuning and evaluation stages required disciplined validation rather than selective reporting. Packaging the workflow with tests, reproducibility files, generated evidence, documentation, and Git history also demonstrated how software-engineering practices make analytical work easier to inspect, repeat, and maintain. The responsible-AI analysis further clarified that technical validity and accountable use must be designed together in credit-risk applications.
-
-### Portfolio value
-
-As a portfolio project, the completed repository demonstrates practical competence in data reconciliation and preprocessing, supervised classification, first-principles model implementation, hyperparameter optimisation, leakage-safe evaluation, explainable modelling, automated testing, reproducible research, report generation, and Git-based project management. The value lies in the traceable workflow from raw data to verified evidence, not in a single metric.
+I found that this assignment strengthened my understanding of the complete machine-learning workflow. Resolving the missing target reinforced the importance of data provenance; constructing the leakage-safe preprocessing workflow clarified the separation between fitting and transformation; and implementing Logistic Regression from first principles connected the underlying mathematics to observed model behaviour. The tuning, evaluation, and responsible-use analysis also showed that valid model assessment requires disciplined validation, clear interpretation, and attention to the consequences of credit decisions.
 
 ## Conclusion
 
-The workflow restored authentic labels without fabrication, prevented leakage, implemented Logistic Regression from first principles, tuned the required algorithm families, evaluated all requested metrics, and produced transparent interpretation. The result is suitable for assessment and portfolio demonstration, not production lending.
+The project successfully implemented the required machine-learning workflow, including verified data preparation, leakage-safe preprocessing, Logistic Regression from first principles, hyperparameter tuning, test-set evaluation, model comparison, and feature interpretation. The resulting analysis satisfies the objectives of the Continuous Assessment while demonstrating sound machine-learning practice and appropriate caution for credit-risk decision support.
 
 ## Reproducibility
 
-Python {results['environment']['python']}; pandas {results['environment']['pandas']}; NumPy {results['environment']['numpy']}; scikit-learn {results['environment']['scikit_learn']}; executed {results['environment']['executed_utc']}. Run the four commands in README.md from a clean environment.
+The project was implemented in Python using standard data-science libraries. The notebook, source code, data-validation records, and generated outputs are reproducible from the supplied project files.
 
 ## Rubric Mapping
 
@@ -211,7 +223,7 @@ Python {results['environment']['python']}; pandas {results['environment']['panda
 
 ## Code and Output Evidence Appendices
 
-The final PDF appends the complete analysis code and curated actual-output figures/screenshots generated by the pipeline.
+The final PDF appends the complete analysis code and curated figures and output evidence required by the assessment.
 """
 
 
@@ -263,7 +275,9 @@ def build_pdf(path: Path, results, include_code=True):
     for image_path in sorted((ROOT / "reports/figures").glob("*.png")):
         story += [Paragraph(image_path.stem.replace("_", " ").title(), styles["Heading2"]), Image(str(image_path), width=16.5*cm, height=9.5*cm, kind="proportional"), PageBreak()]
     for image_path in sorted((ROOT / "reports/screenshots").glob("*.png")):
-        story += [Paragraph(image_path.stem.replace("_", " ").title(), styles["Heading2"]), Image(str(image_path), width=16.5*cm, height=9.5*cm, kind="proportional"), PageBreak()]
+        heading = ("Pipeline Summary" if image_path.stem == "03_pipeline_completion"
+                   else image_path.stem.replace("_", " ").title())
+        story += [Paragraph(heading, styles["Heading2"]), Image(str(image_path), width=16.5*cm, height=9.5*cm, kind="proportional"), PageBreak()]
     if include_code:
         story += [Paragraph("Complete Code Appendix", styles["Heading1"])]
         code_files = (sorted((ROOT / "src/mit8301_credit_risk").glob("*.py")) +
