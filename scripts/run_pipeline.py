@@ -145,7 +145,9 @@ def main():
     }
     metrics, fitted, tuning = [], {}, {}
     for name, (model, grid) in searches.items():
-        pipeline = Pipeline([("preprocess", build_preprocessor(X)), ("model", model)])
+        # Only the training schema is supplied here; all learned preprocessing
+        # statistics are fitted inside GridSearchCV's training folds.
+        pipeline = Pipeline([("preprocess", build_preprocessor(X_train)), ("model", model)])
         search = GridSearchCV(pipeline, grid, cv=cv, scoring="roc_auc", n_jobs=-1, return_train_score=False)
         search.fit(X_train, y_train)
         prediction = search.predict(X_test)
@@ -154,7 +156,7 @@ def main():
         fitted[name] = search.best_estimator_
         tuning[name] = {"best_params": search.best_params_, "best_cv_roc_auc": float(search.best_score_)}
 
-    scratch_preprocessor = build_preprocessor(X)
+    scratch_preprocessor = build_preprocessor(X_train)
     X_train_t = scratch_preprocessor.fit_transform(X_train, y_train)
     X_test_t = scratch_preprocessor.transform(X_test)
     scratch = LogisticRegressionScratch().fit(X_train_t, y_train.to_numpy())
@@ -220,6 +222,16 @@ def main():
     results = {
         "validation": validation, "shape": list(df.shape), "missing_counts": X.isna().sum().to_dict(),
         "outlier_counts_iqr": outliers, "train_rows": len(X_train), "test_rows": len(X_test),
+        "split_strategy": {
+            "test_size": 0.20, "random_state": RANDOM_STATE, "stratified": True,
+            "training_class_counts": {str(k): int(v) for k, v in y_train.value_counts().sort_index().items()},
+            "testing_class_counts": {str(k): int(v) for k, v in y_test.value_counts().sort_index().items()},
+            "training_class_percent": {str(k): float(v * 100) for k, v in y_train.value_counts(normalize=True).sort_index().items()},
+            "testing_class_percent": {str(k): float(v * 100) for k, v in y_test.value_counts(normalize=True).sort_index().items()},
+            "cross_validation": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+            "grid_search_input": "X_train and y_train only",
+            "threshold_optimisation": "None; fixed decision threshold 0.5",
+        },
         "tuning": tuning, "metrics": comparison.to_dict(orient="records"), "selected_model": selected_name,
         "selection_rule": "Prefer the tuned interpretable logistic model when within 0.03 ROC-AUC of the highest model; otherwise select the highest ROC-AUC model.",
         "scratch": {"iterations": scratch.n_iter_, "converged": scratch.converged_, "final_loss": scratch.loss_history_[-1]},

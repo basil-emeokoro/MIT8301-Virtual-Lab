@@ -24,6 +24,14 @@ python scripts\validate_submission.py
 
 Randomness is fixed at 42. All imputers, outlier fences, encoders, and scalers are fitted on training folds only.
 
+## Training, Validation and Test Strategy
+
+The 1,000 observations are split into 800 training rows and 200 independent test rows using `test_size=0.20`, `random_state=42`, and `stratify=y`. The training set contains 560 good and 240 bad applicants; the test set contains 140 good and 60 bad applicants, preserving the 70%/30% distribution in both.
+
+GridSearchCV receives only the training set and uses shuffled Stratified 5-Fold Cross-Validation. These rotating folds provide internal validation, so a separate validation set is unnecessary. After selection, GridSearchCV refits the best configuration on all training rows and the model is evaluated once on the untouched test set. The threshold remains fixed at 0.5.
+
+Imputation, one-hot encoding, robust scaling, and training-fitted IQR clipping are contained in scikit-learn `Pipeline` and `ColumnTransformer` objects. No preprocessing statistics, model-selection decisions, hyperparameters, or thresholds are learned from the test set. This 80% train + 20% test + cross-validation strategy retains more learning data in a relatively small dataset while providing robust hyperparameter evaluation.
+
 ## Models
 
 - Vectorised Logistic Regression from scratch

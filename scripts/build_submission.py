@@ -46,6 +46,7 @@ def build_notebook(results):
         notebook_cell("code", "print(df.isna().sum())\nprint(df.describe(include='all').T)", 2, stream("Saving accounts: 183 missing\nChecking account: 394 missing\nAll other columns: 0 missing\nDuplicate rows: 0")),
         notebook_cell("markdown", "![Target distribution](../reports/figures/01_target_distribution.png)\n\n![Correlation heatmap](../reports/figures/08_correlation_heatmap.png)\n\nDescriptive relationships are associations, not causal effects."),
         notebook_cell("markdown", "## 3. Leakage-safe preprocessing\n\nA stratified 80/20 split uses random state 42. Median imputation, IQR clipping, robust scaling, constant categorical imputation, and one-hot encoding are learned from training data only. Five-fold stratified cross-validation tunes the required models using ROC-AUC."),
+        notebook_cell("markdown", "## Training, Validation and Test Strategy\n\nThe dataset was partitioned into an 80% training set (800 observations: 560 good and 240 bad) and a 20% independent test set (200 observations: 140 good and 60 bad) using a stratified train-test split with `random_state=42`. Both sets therefore preserve the 70% good / 30% bad distribution.\n\nHyperparameter optimisation was performed exclusively on the training data using Stratified 5-Fold Cross-Validation within GridSearchCV. The 800 training observations were repeatedly divided into internal training and validation folds, allowing every observation to serve as validation while preserving class proportions. GridSearchCV then refitted each selected configuration on all 800 training rows before one evaluation on the untouched 200-row test set.\n\nA separate validation set was unnecessary because cross-validation supplies rotating internal validation folds. Although 60/20/20 and 70/15/15 partitions are also valid workflows, this project intentionally used 80% train + 20% test + stratified 5-fold cross-validation because the dataset contains only 1,000 samples, cross-validation provides stronger hyperparameter evaluation, and more observations remain available for learning. No test information was used for model selection, tuning, preprocessing, or threshold optimisation; the threshold remained fixed at 0.5."),
         notebook_cell("markdown", "## 4. Logistic Regression from scratch\n\nThe vectorised implementation includes a stable sigmoid, explicit bias, clipped binary cross-entropy, L2 regularisation, gradient descent, convergence tracking, probabilities, fitted-state checks, and a configurable threshold."),
         notebook_cell("code", "from pathlib import Path\nprint(Path('../reports/tables/model_comparison.md').read_text())", 3, stream(metric_text)),
         notebook_cell("markdown", "![Model comparison](../reports/figures/12_model_metric_comparison.png)\n\n![ROC curves](../reports/figures/13_roc_curves.png)"),
@@ -101,6 +102,16 @@ Savings status has 183 missing values; checking status has 394. A dedicated `Unk
 ## Encoding, Scaling, and Split
 
 The data were split into 800 training and 200 untouched test rows with stratification and random state 42. Age, amount, and duration use median imputation, IQR clipping, and RobustScaler. Nominal fields, including Job, use constant imputation and one-hot encoding with unknown-category tolerance. All transformations are fitted only on training data or within cross-validation folds.
+
+## Training, Validation and Test Strategy
+
+The dataset was partitioned into an 80% training set (800 observations) and a 20% independent test set (200 observations) using a stratified train-test split with `random_state=42`. The training set contains 560 good and 240 bad applicants, and the test set contains 140 good and 60 bad applicants; both therefore preserve the original 70% good / 30% bad class distribution.
+
+Hyperparameter optimisation was performed exclusively on the training data using Stratified 5-Fold Cross-Validation within GridSearchCV. During this process, the 800 training observations were repeatedly divided into internal training and validation folds while preserving class proportions. Every training observation serves in validation across the rotating folds. After optimal hyperparameters were identified, GridSearchCV automatically refitted each model on the complete 800-row training set before a single evaluation on the untouched 200-row test set.
+
+No separate validation dataset was required because cross-validation already creates internal validation folds. Although 60/20/20 and 70/15/15 partitions are also established approaches, this project intentionally adopted 80% train + 20% test + stratified 5-fold cross-validation because the dataset contains only 1,000 observations, cross-validation provides statistically stronger hyperparameter evaluation, and more observations remain available for model learning. This aligns with current scikit-learn and production machine-learning practice.
+
+Missing-value imputation, categorical encoding, numerical scaling, IQR outlier clipping, and all feature transformations are implemented inside scikit-learn Pipeline and ColumnTransformer objects. They are fitted within training folds and subsequently applied to validation or test rows. GridSearchCV received only `X_train` and `y_train`; the decision threshold remained fixed at 0.5, so the test set influenced neither model selection, hyperparameter tuning, preprocessing, nor threshold optimisation.
 
 ## Logistic Regression from Scratch
 
@@ -190,13 +201,13 @@ def build_pdf(path: Path, results, include_code=True):
     for line in md.splitlines():
         if line.startswith("# "):
             continue
-        if line.startswith("| "):
+        if line.startswith("|"):
             in_table = True; table_lines.append(line); continue
         if in_table:
             rows = [[c.strip() for c in row.strip("|").split("|")] for row in table_lines if "---" not in row]
             if rows:
                 t = Table(rows, repeatRows=1, hAlign="LEFT")
-                t.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#DDEAF2")),("GRID",(0,0),(-1,-1),.3,colors.grey),("FONTSIZE",(0,0),(-1,-1),6.8),("VALIGN",(0,0),(-1,-1),"TOP"),("PADDING",(0,0),(-1,-1),3)])); story += [t, Spacer(1, 8)]
+                t.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#DDEAF2")),("GRID",(0,0),(-1,-1),.3,colors.grey),("FONTSIZE",(0,0),(-1,-1),6.8),("VALIGN",(0,0),(-1,-1),"TOP"),("PADDING",(0,0),(-1,-1),3)])); story.append(KeepTogether([t, Spacer(1, 8)]))
             in_table=False; table_lines=[]
         if line.startswith("## "):
             story += [Paragraph(html.escape(line[3:]), styles["Heading1"]), Spacer(1, 4)]

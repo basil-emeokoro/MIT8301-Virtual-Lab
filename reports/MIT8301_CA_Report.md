@@ -36,6 +36,16 @@ Savings status has 183 missing values; checking status has 394. A dedicated `Unk
 
 The data were split into 800 training and 200 untouched test rows with stratification and random state 42. Age, amount, and duration use median imputation, IQR clipping, and RobustScaler. Nominal fields, including Job, use constant imputation and one-hot encoding with unknown-category tolerance. All transformations are fitted only on training data or within cross-validation folds.
 
+## Training, Validation and Test Strategy
+
+The dataset was partitioned into an 80% training set (800 observations) and a 20% independent test set (200 observations) using a stratified train-test split with `random_state=42`. The training set contains 560 good and 240 bad applicants, and the test set contains 140 good and 60 bad applicants; both therefore preserve the original 70% good / 30% bad class distribution.
+
+Hyperparameter optimisation was performed exclusively on the training data using Stratified 5-Fold Cross-Validation within GridSearchCV. During this process, the 800 training observations were repeatedly divided into internal training and validation folds while preserving class proportions. Every training observation serves in validation across the rotating folds. After optimal hyperparameters were identified, GridSearchCV automatically refitted each model on the complete 800-row training set before a single evaluation on the untouched 200-row test set.
+
+No separate validation dataset was required because cross-validation already creates internal validation folds. Although 60/20/20 and 70/15/15 partitions are also established approaches, this project intentionally adopted 80% train + 20% test + stratified 5-fold cross-validation because the dataset contains only 1,000 observations, cross-validation provides statistically stronger hyperparameter evaluation, and more observations remain available for model learning. This aligns with current scikit-learn and production machine-learning practice.
+
+Missing-value imputation, categorical encoding, numerical scaling, IQR outlier clipping, and all feature transformations are implemented inside scikit-learn Pipeline and ColumnTransformer objects. They are fitted within training folds and subsequently applied to validation or test rows. GridSearchCV received only `X_train` and `y_train`; the decision threshold remained fixed at 0.5, so the test set influenced neither model selection, hyperparameter tuning, preprocessing, nor threshold optimisation.
+
 ## Logistic Regression from Scratch
 
 The implementation provides a stable clipped sigmoid, explicit bias, binary cross-entropy, vectorised gradients, L2 regularisation, convergence tolerance, loss history, probability estimates, and input/fitted-state validation. It converged=True in 4233 iterations with final loss 0.50469. Its test performance is compared directly with scikit-learn.
@@ -94,7 +104,7 @@ The workflow restored authentic labels without fabrication, prevented leakage, i
 
 ## Reproducibility
 
-Python 3.13.6; pandas 2.3.0; NumPy 2.3.1; scikit-learn 1.8.0; executed 2026-07-17T12:54:46.575059+00:00. Run the four commands in README.md from a clean environment.
+Python 3.13.6; pandas 2.3.0; NumPy 2.3.1; scikit-learn 1.8.0; executed 2026-07-17T16:48:15.914192+00:00. Run the four commands in README.md from a clean environment.
 
 ## Rubric Mapping
 

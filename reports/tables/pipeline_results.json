@@ -61,6 +61,30 @@
   },
   "train_rows": 800,
   "test_rows": 200,
+  "split_strategy": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "stratified": true,
+    "training_class_counts": {
+      "0": 560,
+      "1": 240
+    },
+    "testing_class_counts": {
+      "0": 140,
+      "1": 60
+    },
+    "training_class_percent": {
+      "0": 70.0,
+      "1": 30.0
+    },
+    "testing_class_percent": {
+      "0": 70.0,
+      "1": 30.0
+    },
+    "cross_validation": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+    "grid_search_input": "X_train and y_train only",
+    "threshold_optimisation": "None; fixed decision threshold 0.5"
+  },
   "tuning": {
     "Tuned Logistic Regression": {
       "best_params": {
@@ -310,6 +334,6 @@
     "pandas": "2.3.0",
     "numpy": "2.3.1",
     "scikit_learn": "1.8.0",
-    "executed_utc": "2026-07-17T12:54:46.575059+00:00"
+    "executed_utc": "2026-07-17T16:48:15.914192+00:00"
   }
 }
