@@ -1,0 +1,315 @@
+{
+  "validation": {
+    "validation_passed": true,
+    "rows_supplied": 1000,
+    "rows_candidate": 1000,
+    "predictor_columns": [
+      "Age",
+      "Sex",
+      "Job",
+      "Housing",
+      "Saving accounts",
+      "Checking account",
+      "Credit amount",
+      "Duration",
+      "Purpose"
+    ],
+    "total_mismatched_cells": 0,
+    "feature_exact_match_percent": {
+      "Age": 100.0,
+      "Sex": 100.0,
+      "Job": 100.0,
+      "Housing": 100.0,
+      "Saving accounts": 100.0,
+      "Checking account": 100.0,
+      "Credit amount": 100.0,
+      "Duration": 100.0,
+      "Purpose": 100.0
+    },
+    "supplied_duplicate_predictor_rows": 0,
+    "candidate_duplicate_predictor_rows": 0,
+    "class_counts": {
+      "0": 700,
+      "1": 300
+    },
+    "source_sha256": "2b129ca0157266a6439be4fdcc908b18da16261625465d22a7f6f7f1a51d3886",
+    "candidate_sha256": "2b786d93d243056258f2a96d6b0c0898bc2c459c0a845cdd7f431d22b54a7c36",
+    "download_date_utc": "2026-07-17",
+    "candidate_source": "Hugging Face mirror of Kaggle German Credit Risk - With Target",
+    "candidate_url": "https://huggingface.co/datasets/AiresPucrs/german-credit-data",
+    "target_mapping": "good -> 0; bad -> 1 (positive class is bad/risky credit)"
+  },
+  "shape": [
+    1000,
+    10
+  ],
+  "missing_counts": {
+    "Age": 0,
+    "Sex": 0,
+    "Job": 0,
+    "Housing": 0,
+    "Saving accounts": 183,
+    "Checking account": 394,
+    "Credit amount": 0,
+    "Duration": 0,
+    "Purpose": 0
+  },
+  "outlier_counts_iqr": {
+    "Age": 23,
+    "Credit amount": 72,
+    "Duration": 70
+  },
+  "train_rows": 800,
+  "test_rows": 200,
+  "tuning": {
+    "Tuned Logistic Regression": {
+      "best_params": {
+        "model__C": 0.1,
+        "model__class_weight": null,
+        "model__penalty": "l2",
+        "model__solver": "liblinear"
+      },
+      "best_cv_roc_auc": 0.7562127976190476
+    },
+    "Tuned SVM": {
+      "best_params": {
+        "model__C": 1,
+        "model__class_weight": "balanced",
+        "model__gamma": 0.1,
+        "model__kernel": "rbf"
+      },
+      "best_cv_roc_auc": 0.7648065476190476
+    },
+    "Tuned Gaussian Naive Bayes": {
+      "best_params": {
+        "model__var_smoothing": 1e-12
+      },
+      "best_cv_roc_auc": 0.6660342261904761
+    }
+  },
+  "metrics": [
+    {
+      "Model": "Tuned SVM",
+      "Accuracy": 0.71,
+      "Precision": 0.5113636363636364,
+      "Recall": 0.75,
+      "F1": 0.6081081081081081,
+      "ROC_AUC": 0.7858928571428571
+    },
+    {
+      "Model": "Tuned Logistic Regression",
+      "Accuracy": 0.73,
+      "Precision": 0.59375,
+      "Recall": 0.31666666666666665,
+      "F1": 0.41304347826086957,
+      "ROC_AUC": 0.7663095238095238
+    },
+    {
+      "Model": "Logistic Regression from Scratch",
+      "Accuracy": 0.72,
+      "Precision": 0.5476190476190477,
+      "Recall": 0.38333333333333336,
+      "F1": 0.45098039215686275,
+      "ROC_AUC": 0.7555952380952381
+    },
+    {
+      "Model": "Tuned Gaussian Naive Bayes",
+      "Accuracy": 0.675,
+      "Precision": 0.47191011235955055,
+      "Recall": 0.7,
+      "F1": 0.5637583892617449,
+      "ROC_AUC": 0.7020238095238096
+    }
+  ],
+  "selected_model": "Tuned Logistic Regression",
+  "selection_rule": "Prefer the tuned interpretable logistic model when within 0.03 ROC-AUC of the highest model; otherwise select the highest ROC-AUC model.",
+  "scratch": {
+    "iterations": 4233,
+    "converged": true,
+    "final_loss": 0.5046872158491059
+  },
+  "top_coefficients": [
+    {
+      "Feature": "cat__Checking account_Unknown_or_No_Account",
+      "Coefficient": -0.8787898960103119,
+      "Absolute coefficient": 0.8787898960103119
+    },
+    {
+      "Feature": "num__Duration",
+      "Coefficient": 0.5139204961972632,
+      "Absolute coefficient": 0.5139204961972632
+    },
+    {
+      "Feature": "cat__Checking account_little",
+      "Coefficient": 0.4708717208173894,
+      "Absolute coefficient": 0.4708717208173894
+    },
+    {
+      "Feature": "cat__Saving accounts_Unknown_or_No_Account",
+      "Coefficient": -0.39154784617354305,
+      "Absolute coefficient": 0.39154784617354305
+    },
+    {
+      "Feature": "cat__Purpose_radio/tv",
+      "Coefficient": -0.35992909732536127,
+      "Absolute coefficient": 0.35992909732536127
+    },
+    {
+      "Feature": "cat__Housing_own",
+      "Coefficient": -0.3427386222999375,
+      "Absolute coefficient": 0.3427386222999375
+    },
+    {
+      "Feature": "cat__Sex_male",
+      "Coefficient": -0.3299031060655768,
+      "Absolute coefficient": 0.3299031060655768
+    },
+    {
+      "Feature": "cat__Saving accounts_little",
+      "Coefficient": 0.3131290266283962,
+      "Absolute coefficient": 0.3131290266283962
+    },
+    {
+      "Feature": "cat__Purpose_education",
+      "Coefficient": 0.30726621384516867,
+      "Absolute coefficient": 0.30726621384516867
+    },
+    {
+      "Feature": "cat__Saving accounts_rich",
+      "Coefficient": -0.282736213328659,
+      "Absolute coefficient": 0.282736213328659
+    }
+  ],
+  "fairness_by_sex": [
+    {
+      "Sex": "female",
+      "n": 61,
+      "Accuracy": 0.7377049180327869,
+      "Recall_bad": 0.45
+    },
+    {
+      "Sex": "male",
+      "n": 139,
+      "Accuracy": 0.7266187050359713,
+      "Recall_bad": 0.25
+    }
+  ],
+  "classification_reports": {
+    "Tuned Logistic Regression": {
+      "0": {
+        "precision": 0.7559523809523809,
+        "recall": 0.9071428571428571,
+        "f1-score": 0.8246753246753247,
+        "support": 140.0
+      },
+      "1": {
+        "precision": 0.59375,
+        "recall": 0.31666666666666665,
+        "f1-score": 0.41304347826086957,
+        "support": 60.0
+      },
+      "accuracy": 0.73,
+      "macro avg": {
+        "precision": 0.6748511904761905,
+        "recall": 0.611904761904762,
+        "f1-score": 0.6188594014680971,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.7072916666666665,
+        "recall": 0.73,
+        "f1-score": 0.7011857707509881,
+        "support": 200.0
+      }
+    },
+    "Tuned SVM": {
+      "0": {
+        "precision": 0.8660714285714286,
+        "recall": 0.6928571428571428,
+        "f1-score": 0.7698412698412699,
+        "support": 140.0
+      },
+      "1": {
+        "precision": 0.5113636363636364,
+        "recall": 0.75,
+        "f1-score": 0.6081081081081081,
+        "support": 60.0
+      },
+      "accuracy": 0.71,
+      "macro avg": {
+        "precision": 0.6887175324675325,
+        "recall": 0.7214285714285714,
+        "f1-score": 0.688974688974689,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.7596590909090909,
+        "recall": 0.71,
+        "f1-score": 0.7213213213213214,
+        "support": 200.0
+      }
+    },
+    "Tuned Gaussian Naive Bayes": {
+      "0": {
+        "precision": 0.8378378378378378,
+        "recall": 0.6642857142857143,
+        "f1-score": 0.7410358565737052,
+        "support": 140.0
+      },
+      "1": {
+        "precision": 0.47191011235955055,
+        "recall": 0.7,
+        "f1-score": 0.5637583892617449,
+        "support": 60.0
+      },
+      "accuracy": 0.675,
+      "macro avg": {
+        "precision": 0.6548739750986942,
+        "recall": 0.6821428571428572,
+        "f1-score": 0.652397122917725,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.7280595201943517,
+        "recall": 0.675,
+        "f1-score": 0.6878526163801172,
+        "support": 200.0
+      }
+    },
+    "Scratch Logistic": {
+      "0": {
+        "precision": 0.7658227848101266,
+        "recall": 0.8642857142857143,
+        "f1-score": 0.8120805369127517,
+        "support": 140.0
+      },
+      "1": {
+        "precision": 0.5476190476190477,
+        "recall": 0.38333333333333336,
+        "f1-score": 0.45098039215686275,
+        "support": 60.0
+      },
+      "accuracy": 0.72,
+      "macro avg": {
+        "precision": 0.6567209162145871,
+        "recall": 0.6238095238095238,
+        "f1-score": 0.6315304645348072,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.7003616636528028,
+        "recall": 0.72,
+        "f1-score": 0.703750493485985,
+        "support": 200.0
+      }
+    }
+  },
+  "environment": {
+    "python": "3.13.6",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "pandas": "2.3.0",
+    "numpy": "2.3.1",
+    "scikit_learn": "1.8.0",
+    "executed_utc": "2026-07-17T12:54:46.575059+00:00"
+  }
+}

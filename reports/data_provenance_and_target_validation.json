@@ -1,0 +1,40 @@
+{
+  "validation_passed": true,
+  "rows_supplied": 1000,
+  "rows_candidate": 1000,
+  "predictor_columns": [
+    "Age",
+    "Sex",
+    "Job",
+    "Housing",
+    "Saving accounts",
+    "Checking account",
+    "Credit amount",
+    "Duration",
+    "Purpose"
+  ],
+  "total_mismatched_cells": 0,
+  "feature_exact_match_percent": {
+    "Age": 100.0,
+    "Sex": 100.0,
+    "Job": 100.0,
+    "Housing": 100.0,
+    "Saving accounts": 100.0,
+    "Checking account": 100.0,
+    "Credit amount": 100.0,
+    "Duration": 100.0,
+    "Purpose": 100.0
+  },
+  "supplied_duplicate_predictor_rows": 0,
+  "candidate_duplicate_predictor_rows": 0,
+  "class_counts": {
+    "0": 700,
+    "1": 300
+  },
+  "source_sha256": "2b129ca0157266a6439be4fdcc908b18da16261625465d22a7f6f7f1a51d3886",
+  "candidate_sha256": "2b786d93d243056258f2a96d6b0c0898bc2c459c0a845cdd7f431d22b54a7c36",
+  "download_date_utc": "2026-07-17",
+  "candidate_source": "Hugging Face mirror of Kaggle German Credit Risk - With Target",
+  "candidate_url": "https://huggingface.co/datasets/AiresPucrs/german-credit-data",
+  "target_mapping": "good -> 0; bad -> 1 (positive class is bad/risky credit)"
+}

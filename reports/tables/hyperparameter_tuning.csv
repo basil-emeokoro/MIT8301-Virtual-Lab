@@ -1,0 +1,4 @@
+Model,Best CV ROC-AUC,Best parameters
+Tuned Logistic Regression,0.7562127976190476,"{""model__C"": 0.1, ""model__class_weight"": null, ""model__penalty"": ""l2"", ""model__solver"": ""liblinear""}"
+Tuned SVM,0.7648065476190476,"{""model__C"": 1, ""model__class_weight"": ""balanced"", ""model__gamma"": 0.1, ""model__kernel"": ""rbf""}"
+Tuned Gaussian Naive Bayes,0.6660342261904761,"{""model__var_smoothing"": 1e-12}"
