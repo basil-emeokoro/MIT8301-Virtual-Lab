@@ -1,0 +1,8 @@
+*.pdf -text
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.ipynb text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.csv text eol=lf
